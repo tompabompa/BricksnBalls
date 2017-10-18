@@ -1,7 +1,5 @@
 package digitman.bricksnballs.domain;
 
-import digitman.bricksnballs.domain.Velocity;
-
 /**
  *
  * @author thomas
