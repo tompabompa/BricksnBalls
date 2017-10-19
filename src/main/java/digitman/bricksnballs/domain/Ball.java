@@ -9,6 +9,7 @@ public class Ball {
     private final int radius;
     private Point position;
     private Velocity velocity;
+    private int baseYSpeed = 7;
 
     public Ball(int radius, Point position) {
         this.radius = radius;
@@ -20,8 +21,15 @@ public class Ball {
         return velocity.isStill();
     }
 
+    public void increaseYSpeed() {
+        baseYSpeed = Math.abs(baseYSpeed) + 2 * baseYSpeed / Math.abs(baseYSpeed);
+        if (!isStill()) {
+            velocity = new Velocity(velocity.x, baseYSpeed);
+        }
+    }
+    
     public void setOff() {
-        velocity = new Velocity(2, 7);
+        velocity = new Velocity(2, baseYSpeed);
     }
 
     public void bounce(Direction where, int... xVelo) {

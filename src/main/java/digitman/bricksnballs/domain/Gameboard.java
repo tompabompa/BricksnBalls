@@ -6,6 +6,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 
 /**
  *
@@ -21,6 +22,8 @@ public class Gameboard {
     private final GraphicsContext gc;
     private final List<String> inputKeys;
     private int countdownBeforeReload = 0;
+    private int score = 0;
+    private int nbrOfBallsLeft = 3;
 
     public Gameboard(Dimension virtualDim, Canvas canvas, List<String> inputKeys) {
         this.virtualDim = virtualDim;
@@ -49,6 +52,8 @@ public class Gameboard {
         drawBat();
         drawWall();
         drawBall();
+        drawScore();
+        drawBallsLeft();
     }
 
     private void drawBat() {
@@ -80,29 +85,59 @@ public class Gameboard {
     }
 
     private void drawBall() {
-        resolveBallVelocity();
-        gc.setFill(Paint.valueOf(Color.WHITE.toString()));
-        Point position = getMappedPoint(ball.getPosition());
-        Dimension radius = getMappedDimension(new Dimension(ball.getRadius(), ball.getRadius()));
-        gc.fillOval(position.x, position.y, radius.width, radius.height);
-        HitData hitData = wall.getHitData(ball.getPosition());
-        if (hitData.isHit()) {
-            wall.remove(hitData.getBrick());
-            ball.bounce(Ball.Direction.VERTICALLY);
-            if (wall.isEmpty()) {
-                countdownBeforeReload = 100;
+        if (nbrOfBallsLeft > 0) {
+            resolveBallVelocity();
+            gc.setFill(Paint.valueOf(Color.WHITE.toString()));
+            Point position = getMappedPoint(ball.getPosition());
+            Dimension radius = getMappedDimension(new Dimension(ball.getRadius(), ball.getRadius()));
+            gc.fillOval(position.x, position.y, radius.width, radius.height);
+            HitData hitData = wall.getHitData(ball.getPosition());
+            if (hitData.isHit()) {
+                score += getScore(Achievement.BRICK_HIT);
+                wall.remove(hitData.getBrick());
+                ball.bounce(Ball.Direction.VERTICALLY);
+                if (wall.isEmpty()) {
+                    score += getScore(Achievement.WALL_DOWN);
+                    countdownBeforeReload = 100;
+                }
             }
-        }
-        if (countdownBeforeReload > 0) {
-            countdownBeforeReload--;
-            if (countdownBeforeReload == 0) {
-                wall = new Wall();
+            if (countdownBeforeReload > 0) {
+                countdownBeforeReload--;
+                if (countdownBeforeReload == 0) {
+                    wall = new Wall();
+                    ball.increaseYSpeed();
+                    bat.shorten();
+                }
             }
         }
     }
 
+    private int getScore(Achievement a) {
+        return a == Achievement.BRICK_HIT ? 20 : 500;
+    }
+
+    private void drawScore() {
+        gc.setFill(Paint.valueOf(Color.BLACK.toString()));
+        Point position = getMappedPoint(new Point(20, 950));
+        gc.setFont(Font.font(20.0));
+        gc.fillText(String.valueOf(score), position.x, position.y);
+    }
+
+    private void drawBallsLeft() {
+        gc.setFill(Paint.valueOf(Color.LIGHTGRAY.toString()));
+        Dimension radius = getMappedDimension(new Dimension(ball.getRadius(), ball.getRadius()));
+        for (int i = 1; i < nbrOfBallsLeft; i++) {
+            Point position = getMappedPoint(new Point(1000 - i * radius.width * 3, 950));
+            gc.fillOval(position.x, position.y, radius.width, radius.height);
+        }
+    }
+
+    private enum Achievement {
+        BRICK_HIT, WALL_DOWN;
+    }
+
     private void resolveBallVelocity() {
-        if (inputKeys.contains("S") && ball.isStill()) {
+        if (inputKeys.contains("S") && ball.isStill() && nbrOfBallsLeft > 0) {
             ball.setOff();
         } else {
             Point position = ball.move();
@@ -120,6 +155,7 @@ public class Gameboard {
                 ball.setPosition(new Point(position.x, virtualDim.height));
             } else if (position.y < 0) {
                 ball.stop();
+                nbrOfBallsLeft--;
             }
         }
     }

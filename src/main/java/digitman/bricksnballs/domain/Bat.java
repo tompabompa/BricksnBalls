@@ -8,7 +8,7 @@ import java.awt.Dimension;
  */
 public class Bat {
 
-    private final Dimension size;
+    private Dimension size;
     private Point position;
     private Velocity velocity = new Velocity(0, 0);
     private final int BASE_SPEED = 5;
@@ -31,6 +31,10 @@ public class Bat {
         return position;
     }
 
+    public void shorten() {
+        size = new Dimension(size.width - 4, size.height);
+    }
+    
     public void setPosition(Point position) {
         this.position = position;
     }
