@@ -6,15 +6,17 @@ package digitman.bricksnballs.domain;
  */
 public class Ball {
 
+    private final int ORIGINAL_BASE_SPEED = 7;
     private final int radius;
     private Point position;
     private Velocity velocity;
-    private int baseYSpeed = 7;
+    private int baseYSpeed;
 
     public Ball(int radius, Point position) {
         this.radius = radius;
         this.position = position;
         velocity = new Velocity(0, 0);
+        resetSpeed();
     }
 
     public boolean isStill() {
@@ -26,6 +28,10 @@ public class Ball {
         if (!isStill()) {
             velocity = new Velocity(velocity.x, baseYSpeed);
         }
+    }
+    
+    public final void resetSpeed() {
+        baseYSpeed = ORIGINAL_BASE_SPEED;
     }
     
     public void setOff() {

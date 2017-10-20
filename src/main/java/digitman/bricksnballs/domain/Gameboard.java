@@ -54,6 +54,7 @@ public class Gameboard {
         drawBall();
         drawScore();
         drawBallsLeft();
+        drawEndText();
     }
 
     private void drawBat() {
@@ -98,6 +99,7 @@ public class Gameboard {
                 ball.bounce(Ball.Direction.VERTICALLY);
                 if (wall.isEmpty()) {
                     score += getScore(Achievement.WALL_DOWN);
+                    nbrOfBallsLeft++;
                     countdownBeforeReload = 100;
                 }
             }
@@ -116,6 +118,23 @@ public class Gameboard {
         return a == Achievement.BRICK_HIT ? 20 : 500;
     }
 
+    private void drawEndText() {
+        if (nbrOfBallsLeft == 0) {
+            gc.setFill(Paint.valueOf(Color.BLACK.toString()));
+            Point position = getMappedPoint(new Point(310, 480));
+            gc.setFont(Font.font(40.0));
+            gc.fillText("Play again (Y/N)?", position.x, position.y);
+            if (inputKeys.contains("Y")) {
+                nbrOfBallsLeft = 3;
+                score = 0;
+                wall = new Wall();
+                ball.resetSpeed();
+            } else if (inputKeys.contains("N")) {
+                System.exit(0);
+            }
+        }
+    }
+
     private void drawScore() {
         gc.setFill(Paint.valueOf(Color.BLACK.toString()));
         Point position = getMappedPoint(new Point(20, 950));
@@ -127,7 +146,7 @@ public class Gameboard {
         gc.setFill(Paint.valueOf(Color.LIGHTGRAY.toString()));
         Dimension radius = getMappedDimension(new Dimension(ball.getRadius(), ball.getRadius()));
         for (int i = 1; i < nbrOfBallsLeft; i++) {
-            Point position = getMappedPoint(new Point(1000 - i * radius.width * 3, 950));
+            Point position = getMappedPoint(new Point(1000 - i * radius.width * 2, 970));
             gc.fillOval(position.x, position.y, radius.width, radius.height);
         }
     }
