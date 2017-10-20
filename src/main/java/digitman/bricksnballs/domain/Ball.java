@@ -22,7 +22,7 @@ public class Ball {
     }
 
     public void increaseYSpeed() {
-        baseYSpeed = Math.abs(baseYSpeed) + 2 * baseYSpeed / Math.abs(baseYSpeed);
+        baseYSpeed = (Math.abs(baseYSpeed) + 2) * baseYSpeed / Math.abs(baseYSpeed);
         if (!isStill()) {
             velocity = new Velocity(velocity.x, baseYSpeed);
         }
