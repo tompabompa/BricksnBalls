@@ -2,6 +2,7 @@ package digitman.bricksnballs.domain;
 
 import java.awt.Dimension;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -24,14 +25,16 @@ public class Gameboard {
     private int countdownBeforeReload = 0;
     private int score = 0;
     private int nbrOfBallsLeft = 3;
+    private final ConcurrentLinkedQueue<Integer> mouseMoves;
 
-    public Gameboard(Dimension virtualDim, Canvas canvas, List<String> inputKeys) {
+    public Gameboard(Dimension virtualDim, Canvas canvas, List<String> inputKeys, ConcurrentLinkedQueue<Integer> mouseMoves) {
         this.virtualDim = virtualDim;
         this.canvas = canvas;
         gc = canvas.getGraphicsContext2D();
         this.inputKeys = inputKeys;
         bat = new Bat(new Dimension(virtualDim.width / 10, virtualDim.height / 50), new Point(virtualDim.width / 2, 10));
         ball = new Ball(bat.getSize().height, new Point(bat.getPosition().x, bat.getPosition().y + bat.getSize().height));
+        this.mouseMoves = mouseMoves;
     }
 
     private Point getMappedPoint(Point virtual) {
@@ -82,6 +85,9 @@ public class Gameboard {
             bat.moveLeft();
         } else {
             bat.stop();
+        }
+        for (Integer xPos = mouseMoves.poll(); xPos != null; xPos = mouseMoves.poll()) {
+            bat.setPosition(new Point(xPos, bat.getPosition().y));
         }
     }
 
